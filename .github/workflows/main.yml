@@ -19,5 +19,5 @@ jobs:
       with:
         server: ftp.penality.com.br
         username: resumo@resumos.sanguedepolicia.com.br
-  password: ${{ secrets.FTP_PASSWORD }}
-  server-dir: /
+        password: ${{ secrets.FTP_PASSWORD }}
+        server-dir: /APP/
