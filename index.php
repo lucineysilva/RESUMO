@@ -116,7 +116,7 @@ foreach ($pastas as $pasta) {
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Resumos do Prof F.silva</h1>
+    <h1>Resumos do-- Prof F.silva</h1>
     <!-- Menu principal (pastas) -->
     <div id="pastas">
         <?php foreach ($pastas as $pasta): ?>
