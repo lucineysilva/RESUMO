@@ -1,0 +1,16 @@
+{
+  "name": "start-dev",
+  "version": "1.0.0",
+  "description": "Script para iniciar o ambiente de desenvolvimento completo",
+  "scripts": {
+    "start": "concurrently \"npm run start-react\" \"npm run start-php\"",
+    "start-react": "cd .. && npm start",
+    "start-php": "php -S localhost:8080 -t .",
+    "build": "cd .. && npm run build",
+    "serve-build": "serve -s build"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "serve": "^14.2.1"
+  }
+}

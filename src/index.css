@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Inter', 'Segoe UI', 'Tahoma', 'Geneva', 'Verdana', sans-serif;
+  background: url('./img/1.jpg') no-repeat center center fixed;
+  background-size: cover;
+  color: #e0e0e0;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* Destacar texto sendo lido */
+.highlight {
+  background-color: yellow;
+  color: black;
+  font-weight: bold;
+  padding: 2px;
+  border-radius: 4px;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+/* Texto marcado pelo usuário */
+.user-highlight {
+  background-color: #ffeb3b;
+  color: black;
+  border-radius: 2px;
+  cursor: pointer;
+  position: relative;
+}
+
+/* Nota do usuário */
+.user-note {
+  background-color: #4caf50;
+  color: white;
+  border-radius: 2px;
+  cursor: pointer;
+  position: relative;
+}
+
+/* Barra de rolagem customizada */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #b76e00;
+  border-radius: 10px;
+  border: 3px solid #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #ff5722;
+}
+
+/* Transições suaves */
+.transition-all {
+  transition: all 0.3s ease;
+}
+
+/* Animações de entrada */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.slide-in {
+  animation: slideIn 0.4s ease-out;
+}
