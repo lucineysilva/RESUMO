@@ -94,8 +94,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({ filePath, onClos
     const walker = doc.createTreeWalker(
       doc.body,
       NodeFilter.SHOW_TEXT,
-      null,
-      false
+      null
     );
 
     let currentIndex = 0;
@@ -162,7 +161,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({ filePath, onClos
     if (selection && selection.rangeCount > 0) {
       const range = selection.getRangeAt(0);
       const highlight = await AnnotationService.createHighlight({
-        userId: user.id,
+        userId: user.id.toString(),
         filePath,
         startOffset: range.startOffset,
         endOffset: range.endOffset,
@@ -201,7 +200,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({ filePath, onClos
         }
       } else {
         const note = await AnnotationService.createNote({
-          userId: user.id,
+          userId: user.id.toString(),
           filePath,
           startOffset: range.startOffset,
           endOffset: range.endOffset,

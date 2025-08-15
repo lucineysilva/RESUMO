@@ -1,11 +1,117 @@
-import { createClient } from '@supabase/supabase-js';
+// Serviço para conectar com API MySQL local
+export interface User {
+  id: number;
+  email: string;
+  name?: string;
+}
 
-// Para demonstração, usando variáveis mockadas
-// Em produção, use variáveis de ambiente reais
-const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || 'https://your-project.supabase.co';
-const supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY || 'your-anon-key';
+export interface AuthResponse {
+  success: boolean;
+  user?: User;
+  message: string;
+}
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+class MySQLAuthService {
+  private baseUrl = '/api';
+
+  async signInWithPassword(credentials: { email: string; password: string }): Promise<{ data?: { user: User }, error?: Error }> {
+    try {
+      const response = await fetch(`${this.baseUrl}/auth.php?action=login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(credentials),
+      });
+
+      const result: AuthResponse = await response.json();
+
+      if (result.success && result.user) {
+        // Salvar usuário no localStorage para persistir sessão
+        localStorage.setItem('user', JSON.stringify(result.user));
+        return { data: { user: result.user } };
+      } else {
+        return { error: new Error(result.message) };
+      }
+    } catch (error) {
+      return { error: error as Error };
+    }
+  }
+
+  async signUp(credentials: { email: string; password: string; options?: { data?: { name?: string } } }): Promise<{ data?: { user: User }, error?: Error }> {
+    try {
+      const response = await fetch(`${this.baseUrl}/auth.php?action=register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: credentials.email,
+          password: credentials.password,
+          name: credentials.options?.data?.name,
+        }),
+      });
+
+      const result: AuthResponse = await response.json();
+
+      if (result.success && result.user) {
+        // Salvar usuário no localStorage
+        localStorage.setItem('user', JSON.stringify(result.user));
+        return { data: { user: result.user } };
+      } else {
+        return { error: new Error(result.message) };
+      }
+    } catch (error) {
+      return { error: error as Error };
+    }
+  }
+
+  async getSession(): Promise<{ data: { session: { user: User } | null } }> {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      return { data: { session: { user } } };
+    }
+    return { data: { session: null } };
+  }
+
+  async signOut(): Promise<{ error?: Error }> {
+    localStorage.removeItem('user');
+    return {};
+  }
+
+  onAuthStateChange(callback: (event: string, session: { user: User } | null) => void) {
+    // Simular mudança de estado de autenticação
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      callback('SIGNED_IN', { user });
+    } else {
+      callback('SIGNED_OUT', null);
+    }
+
+    // Retornar subscription mock
+    return {
+      data: {
+        subscription: {
+          unsubscribe: () => {}
+        }
+      }
+    };
+  }
+}
+
+// Instância do serviço de autenticação
+export const supabase = {
+  auth: new MySQLAuthService(),
+  // Mock para outras funcionalidades se necessário
+  from: () => ({
+    insert: () => ({ select: () => ({ single: () => Promise.resolve({ data: null, error: null }) }) }),
+    select: () => ({ eq: () => Promise.resolve({ data: [], error: null }) }),
+    update: () => ({ eq: () => Promise.resolve({ error: null }) }),
+    delete: () => ({ eq: () => Promise.resolve({ error: null }) })
+  })
+};
 
 // Database schema SQL para criação das tabelas:
 /*

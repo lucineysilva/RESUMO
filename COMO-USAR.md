@@ -38,28 +38,52 @@ npm start
 
 ## 🔧 Configuração Inicial
 
-### 1. Configurar Supabase (Opcional para demonstração)
-1. Copie `.env.example` para `.env.local`
-2. Configure suas chaves do Supabase
-3. Execute o SQL no Supabase para criar as tabelas
+### 1. Configurar Banco MySQL (Obrigatório)
 
-### 2. Sem Supabase (Modo Demonstração)
-- O sistema funcionará com dados locais simulados
-- Autenticação aceita qualquer email/senha
+#### Windows:
+```bat
+setup-database.bat
+```
+
+#### Manual (MySQL):
+```sql
+-- Conectar ao MySQL
+mysql -h 127.0.0.1 -u root -p
+
+-- Executar arquivo SQL
+source database/setup.sql
+```
+
+#### Credenciais Padrão:
+- **Host**: 127.0.0.1
+- **Usuário**: root  
+- **Senha**: (sem senha)
+- **Banco**: resumos_db
+
+### 2. Usuário de Teste Criado:
+- **Email**: teste@teste.com
+- **Senha**: password
+
+### 3. Sem MySQL? 
+- Instale: https://dev.mysql.com/downloads/mysql/
+- Ou use XAMPP: https://www.apachefriends.org/
 
 ## ✅ Verificação
 
-1. ✅ React carregando em http://localhost:3000
-2. ✅ PHP respondendo em http://localhost:8080
-3. ✅ API retornando dados em http://localhost:8080/api/file-structure.php
-4. ✅ Arquivos HTML acessíveis em http://localhost:8080/resumos/
+1. ✅ MySQL rodando e banco `resumos_db` criado
+2. ✅ React carregando em http://localhost:3000
+3. ✅ PHP respondendo em http://localhost:8080
+4. ✅ API retornando dados em http://localhost:8080/api/file-structure.php
+5. ✅ Login funcionando com teste@teste.com / password
+6. ✅ Arquivos HTML acessíveis em http://localhost:8080/resumos/
 
 ## 🎮 Como Usar
 
 ### 1. **Login/Cadastro**
 - Tela inicial com formulário de autenticação
-- Para demonstração: use qualquer email/senha
-- Sistema criará conta automaticamente
+- **Login teste**: teste@teste.com / password
+- **Cadastro**: Crie uma nova conta com qualquer email válido
+- Sistema salva dados no banco MySQL local
 
 ### 2. **Navegação**
 - **Categorias**: Clique nas pastas principais (ex: DIREITO-PENAL)
@@ -113,8 +137,9 @@ npm start
 ### Sistema de Anotações
 - Highlights amarelos para texto marcado
 - Notas verdes com conteúdo personalizado
-- Sincronização com servidor (Supabase)
+- Sincronização com banco MySQL local
 - Edição e exclusão de anotações
+- Dados salvos por usuário
 
 ### Navegação Intuitiva
 - Breadcrumbs visuais
@@ -124,22 +149,37 @@ npm start
 
 ## 🚨 Solução de Problemas
 
-### Erro: "Cannot find module"
+### Erro: "Cannot find module" ou dependências
 ```bash
 npm install
 ```
 
-### PHP não inicia
+### PHP não inicia ou API não responde
 - Verificar se PHP está instalado: `php --version`
-- Porta 8080 ocupada? Altere para 8081 no script
+- Porta 8080 ocupada? Matar processo: `taskkill /f /im php.exe`
+- Tentar porta alternativa: `php -S localhost:8081`
 
 ### React não conecta com PHP
 - Verificar se ambos servidores estão rodando
 - Testar API diretamente: http://localhost:8080/api/file-structure.php
+- Verificar proxy no console do navegador
+
+### Erro de CORS
+- API já configurada com CORS para localhost:3000
+- Se usar porta diferente, atualizar no arquivo api/file-structure.php
+
+### Imagem de fundo não aparece
+- Verificar se arquivo img/1.jpg existe na raiz do projeto
+- Servidor PHP deve servir arquivos estáticos
 
 ### Supabase não conecta
-- Verificar chaves no .env.local
-- Testar autenticação local (modo demo)
+- Sistema funcionará em modo demonstração mesmo sem Supabase
+- Para configurar: copiar .env.example para .env.local
+- Adicionar suas chaves do Supabase no .env.local
+
+### Erro TypeScript
+- Projeto já configurado com tsconfig.json
+- Em caso de erro: deletar node_modules e rodar `npm install`
 
 ## 📱 Deploy em Produção
 

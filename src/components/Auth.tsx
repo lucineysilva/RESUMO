@@ -39,7 +39,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin, onRegister }) => {
     <div 
       className="min-h-screen flex items-center justify-center p-4"
       style={{
-        background: "url('./img/1.jpg') no-repeat center center fixed",
+        background: "url('/img/1.jpg') no-repeat center center fixed",
         backgroundSize: 'cover'
       }}
     >

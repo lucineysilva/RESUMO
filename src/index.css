@@ -4,7 +4,7 @@
 
 body {
   font-family: 'Inter', 'Segoe UI', 'Tahoma', 'Geneva', 'Verdana', sans-serif;
-  background: url('./img/1.jpg') no-repeat center center fixed;
+  background: url('/img/1.jpg') no-repeat center center fixed;
   background-size: cover;
   color: #e0e0e0;
   margin: 0;

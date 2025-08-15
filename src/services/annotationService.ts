@@ -1,33 +1,56 @@
-import { supabase } from './supabase';
 import { Highlight, Note } from '../types';
 
 export class AnnotationService {
+  private static baseUrl = '/api';
+  
+  private static async getCurrentUser(): Promise<{ id: number } | null> {
+    const userStr = localStorage.getItem('user');
+    return userStr ? JSON.parse(userStr) : null;
+  }
+
+  private static async makeRequest(url: string, options: RequestInit = {}) {
+    const user = await this.getCurrentUser();
+    if (!user) throw new Error('Usuário não autenticado');
+
+    return fetch(url, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        'X-User-ID': user.id.toString(),
+        ...options.headers,
+      },
+    });
+  }
+
   // Highlights
   static async createHighlight(highlight: Omit<Highlight, 'id' | 'createdAt'>): Promise<Highlight | null> {
     try {
-      const { data, error } = await supabase
-        .from('highlights')
-        .insert({
-          user_id: highlight.userId,
+      const response = await this.makeRequest(`${this.baseUrl}/annotations.php`, {
+        method: 'POST',
+        body: JSON.stringify({
+          type: 'highlight',
           file_path: highlight.filePath,
           start_offset: highlight.startOffset,
           end_offset: highlight.endOffset,
           text: highlight.text,
-        })
-        .select()
-        .single();
+        }),
+      });
 
-      if (error) throw error;
+      const result = await response.json();
       
-      return {
-        id: data.id,
-        userId: data.user_id,
-        filePath: data.file_path,
-        startOffset: data.start_offset,
-        endOffset: data.end_offset,
-        text: data.text,
-        createdAt: data.created_at,
-      };
+      if (result.success && result.highlight) {
+        return {
+          id: result.highlight.id.toString(),
+          userId: result.highlight.user_id.toString(),
+          filePath: result.highlight.file_path,
+          startOffset: result.highlight.start_offset,
+          endOffset: result.highlight.end_offset,
+          text: result.highlight.text,
+          createdAt: result.highlight.created_at,
+        };
+      }
+      
+      return null;
     } catch (error) {
       console.error('Error creating highlight:', error);
       return null;
@@ -36,22 +59,25 @@ export class AnnotationService {
 
   static async getHighlights(filePath: string): Promise<Highlight[]> {
     try {
-      const { data, error } = await supabase
-        .from('highlights')
-        .select('*')
-        .eq('file_path', filePath);
+      const response = await this.makeRequest(
+        `${this.baseUrl}/annotations.php?type=highlights&file_path=${encodeURIComponent(filePath)}`
+      );
 
-      if (error) throw error;
+      const result = await response.json();
 
-      return data.map((item: any) => ({
-        id: item.id,
-        userId: item.user_id,
-        filePath: item.file_path,
-        startOffset: item.start_offset,
-        endOffset: item.end_offset,
-        text: item.text,
-        createdAt: item.created_at,
-      }));
+      if (result.success && result.highlights) {
+        return result.highlights.map((item: any) => ({
+          id: item.id.toString(),
+          userId: item.user_id.toString(),
+          filePath: item.file_path,
+          startOffset: item.start_offset,
+          endOffset: item.end_offset,
+          text: item.text,
+          createdAt: item.created_at,
+        }));
+      }
+
+      return [];
     } catch (error) {
       console.error('Error fetching highlights:', error);
       return [];
@@ -60,13 +86,13 @@ export class AnnotationService {
 
   static async deleteHighlight(id: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('highlights')
-        .delete()
-        .eq('id', id);
+      const response = await this.makeRequest(
+        `${this.baseUrl}/annotations.php?type=highlight&id=${id}`,
+        { method: 'DELETE' }
+      );
 
-      if (error) throw error;
-      return true;
+      const result = await response.json();
+      return result.success;
     } catch (error) {
       console.error('Error deleting highlight:', error);
       return false;
@@ -76,32 +102,35 @@ export class AnnotationService {
   // Notes
   static async createNote(note: Omit<Note, 'id' | 'createdAt' | 'updatedAt'>): Promise<Note | null> {
     try {
-      const { data, error } = await supabase
-        .from('notes')
-        .insert({
-          user_id: note.userId,
+      const response = await this.makeRequest(`${this.baseUrl}/annotations.php`, {
+        method: 'POST',
+        body: JSON.stringify({
+          type: 'note',
           file_path: note.filePath,
           start_offset: note.startOffset,
           end_offset: note.endOffset,
           text: note.text,
           note_content: note.noteContent,
-        })
-        .select()
-        .single();
+        }),
+      });
 
-      if (error) throw error;
+      const result = await response.json();
 
-      return {
-        id: data.id,
-        userId: data.user_id,
-        filePath: data.file_path,
-        startOffset: data.start_offset,
-        endOffset: data.end_offset,
-        text: data.text,
-        noteContent: data.note_content,
-        createdAt: data.created_at,
-        updatedAt: data.updated_at,
-      };
+      if (result.success && result.note) {
+        return {
+          id: result.note.id.toString(),
+          userId: result.note.user_id.toString(),
+          filePath: result.note.file_path,
+          startOffset: result.note.start_offset,
+          endOffset: result.note.end_offset,
+          text: result.note.text,
+          noteContent: result.note.note_content,
+          createdAt: result.note.created_at,
+          updatedAt: result.note.updated_at,
+        };
+      }
+
+      return null;
     } catch (error) {
       console.error('Error creating note:', error);
       return null;
@@ -110,24 +139,27 @@ export class AnnotationService {
 
   static async getNotes(filePath: string): Promise<Note[]> {
     try {
-      const { data, error } = await supabase
-        .from('notes')
-        .select('*')
-        .eq('file_path', filePath);
+      const response = await this.makeRequest(
+        `${this.baseUrl}/annotations.php?type=notes&file_path=${encodeURIComponent(filePath)}`
+      );
 
-      if (error) throw error;
+      const result = await response.json();
 
-      return data.map((item: any) => ({
-        id: item.id,
-        userId: item.user_id,
-        filePath: item.file_path,
-        startOffset: item.start_offset,
-        endOffset: item.end_offset,
-        text: item.text,
-        noteContent: item.note_content,
-        createdAt: item.created_at,
-        updatedAt: item.updated_at,
-      }));
+      if (result.success && result.notes) {
+        return result.notes.map((item: any) => ({
+          id: item.id.toString(),
+          userId: item.user_id.toString(),
+          filePath: item.file_path,
+          startOffset: item.start_offset,
+          endOffset: item.end_offset,
+          text: item.text,
+          noteContent: item.note_content,
+          createdAt: item.created_at,
+          updatedAt: item.updated_at,
+        }));
+      }
+
+      return [];
     } catch (error) {
       console.error('Error fetching notes:', error);
       return [];
@@ -136,16 +168,16 @@ export class AnnotationService {
 
   static async updateNote(id: string, noteContent: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('notes')
-        .update({ 
-          note_content: noteContent, 
-          updated_at: new Date().toISOString() 
-        })
-        .eq('id', id);
+      const response = await this.makeRequest(`${this.baseUrl}/annotations.php`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          id: parseInt(id),
+          note_content: noteContent,
+        }),
+      });
 
-      if (error) throw error;
-      return true;
+      const result = await response.json();
+      return result.success;
     } catch (error) {
       console.error('Error updating note:', error);
       return false;
@@ -154,13 +186,13 @@ export class AnnotationService {
 
   static async deleteNote(id: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('notes')
-        .delete()
-        .eq('id', id);
+      const response = await this.makeRequest(
+        `${this.baseUrl}/annotations.php?type=note&id=${id}`,
+        { method: 'DELETE' }
+      );
 
-      if (error) throw error;
-      return true;
+      const result = await response.json();
+      return result.success;
     } catch (error) {
       console.error('Error deleting note:', error);
       return false;

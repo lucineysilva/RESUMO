@@ -126,9 +126,9 @@ function App() {
   const getDocumentPath = () => {
     const { currentFolder, currentSubfolder, currentFile } = appState;
     if (currentSubfolder === '__raiz__') {
-      return `resumos/${currentFolder}/${currentFile}`;
+      return `/resumos/${currentFolder}/${currentFile}`;
     }
-    return `resumos/${currentFolder}/${currentSubfolder}/${currentFile}`;
+    return `/resumos/${currentFolder}/${currentSubfolder}/${currentFile}`;
   };
 
   const handleLogout = async () => {
@@ -153,7 +153,7 @@ function App() {
     <div 
       className="min-h-screen"
       style={{
-        background: "url('./img/1.jpg') no-repeat center center fixed",
+        background: "url('/img/1.jpg') no-repeat center center fixed",
         backgroundSize: 'cover'
       }}
     >

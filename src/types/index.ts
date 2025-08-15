@@ -26,12 +26,6 @@ export interface Note {
   updatedAt: string;
 }
 
-export interface User {
-  id: string;
-  email: string;
-  name?: string;
-}
-
 export interface TTSSettings {
   voice: SpeechSynthesisVoice | null;
   rate: number;
