@@ -9,27 +9,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-require_once 'database.php';
+require_once 'database-sqlite.php';
 
 class AuthAPI {
     private $db;
-    private $conn;
 
     public function __construct() {
-        $database = new Database();
-        $this->conn = $database->getConnection();
+        $this->db = new DatabaseSQLite();
     }
 
     public function login($email, $password) {
         try {
-            $query = "SELECT id, email, password_hash, name FROM users WHERE email = ?";
-            $stmt = $this->conn->prepare($query);
-            $stmt->execute([$email]);
+            $query = "SELECT id, email, password, name FROM users WHERE email = ?";
+            $user = $this->db->fetchOne($query, [$email]);
             
-            $user = $stmt->fetch();
-            
-            if ($user && password_verify($password, $user['password_hash'])) {
-                unset($user['password_hash']);
+            if ($user && password_verify($password, $user['password'])) {
+                unset($user['password']);
                 return [
                     'success' => true,
                     'user' => $user,
@@ -53,10 +48,9 @@ class AuthAPI {
         try {
             // Verificar se usuário já existe
             $query = "SELECT id FROM users WHERE email = ?";
-            $stmt = $this->conn->prepare($query);
-            $stmt->execute([$email]);
+            $user = $this->db->fetchOne($query, [$email]);
             
-            if ($stmt->fetch()) {
+            if ($user) {
                 return [
                     'success' => false,
                     'message' => 'Email já cadastrado'
@@ -65,18 +59,19 @@ class AuthAPI {
 
             // Criar novo usuário
             $password_hash = password_hash($password, PASSWORD_DEFAULT);
-            $query = "INSERT INTO users (email, password_hash, name) VALUES (?, ?, ?)";
-            $stmt = $this->conn->prepare($query);
-            $stmt->execute([$email, $password_hash, $name]);
             
-            $user_id = $this->conn->lastInsertId();
+            $user_id = $this->db->insert('users', [
+                'email' => $email,
+                'password' => $password_hash,
+                'name' => $name ?: $email
+            ]);
             
             return [
                 'success' => true,
                 'user' => [
                     'id' => $user_id,
                     'email' => $email,
-                    'name' => $name
+                    'name' => $name ?: $email
                 ],
                 'message' => 'Usuário criado com sucesso'
             ];
