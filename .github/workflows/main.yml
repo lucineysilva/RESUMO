@@ -21,4 +21,4 @@ jobs:
         username: resumo@resumos.sanguedepolicia.com.br
         password: ${{ secrets.FTP_PASSWORD }}
         server-dir: /
-    
+        local-dir: .
