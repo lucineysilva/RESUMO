@@ -1,1 +1,1 @@
-# RESUMO
+Readme inicial para appresumos 
