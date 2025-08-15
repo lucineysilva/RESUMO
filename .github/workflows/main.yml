@@ -1,0 +1,29 @@
+on: 
+  push:
+    branches:
+      - main
+
+name: Deploy to HostGator
+
+jobs:
+  web-deploy:
+    name: deploy
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 🚚 Get latest code
+      uses: actions/checkout@v4
+    
+    - name: 📂 Sync files
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: ftp.penality.com.br
+        username: resumo@resumos.sanguedepolicia.com.br
+        password: ${{ secrets.FTP_PASSWORD }}
+        server-dir: /
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
+          **/.github/**
+          README.md
